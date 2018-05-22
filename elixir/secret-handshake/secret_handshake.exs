@@ -1,7 +1,8 @@
 defmodule SecretHandshake do
   use Bitwise
 
-  @binary_map  %{0b1 => "wink", 0b10 => "double blink", 0b100 => "close your eyes", 0b1000 => "jump"}
+  @bit_map  %{0b1 => "wink", 0b10 => "double blink", 0b100 => "close your eyes", 0b1000 => "jump"}
+  @bit_reverse 0b10000
 
   @doc """
   Determine the actions of a secret handshake based on the binary
@@ -19,19 +20,29 @@ defmodule SecretHandshake do
   """
   @spec commands(code :: integer) :: list(String.t())
   def commands(code) do
-    secret = Enum.filter(@binary_map, fn({key, _val}) -> set?(code, key) end)
-    |> Enum.map(fn({_key, val}) -> val end)
-
-    if reverse?(code), do: Enum.reverse(secret), else: secret
+    decode(code) |> reverse(code &&& @bit_reverse)
   end
 
   @spec set?(flags :: integer, check :: integer) :: boolean()
-  def set?(flags, check) do
+  defp set?(flags, check) do
     band(flags, check) == check
   end
 
-  @spec reverse?(code :: integer) :: boolean()
-  def reverse?(code) do
-    set?(code, 0b10000)
+  @spec decode(code :: integer) :: list(String.t())
+  defp decode(code) do
+    for {key, val} <- @bit_map,
+        set?(code, key) do
+      val
+    end
+  end
+
+  @spec reverse(secret :: list(String.t()), @bit_reverse :: integer) :: list(String.t())
+  defp reverse(secret, @bit_reverse) do
+    Enum.reverse(secret)
+  end
+
+  @spec reverse(secret :: list(String.t()), _code :: integer) :: list(String.t())
+  defp reverse(secret, _code) do
+    secret
   end
 end
