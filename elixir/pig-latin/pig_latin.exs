@@ -1,6 +1,7 @@
 defmodule PigLatin do
   @vowels ["a", "e", "i", "o", "u", "yt", "xr"]
   @consonants for(n <- ?a..?z, do: <<n::utf8>>) -- @vowels ++ ["ch", "qu", "squ", "th", "thr", "sch"]
+  @magic_consonants ["x", "y"]
 
   @doc """
   Given a `phrase`, translate it a word at a time to Pig Latin.
@@ -23,24 +24,37 @@ defmodule PigLatin do
     |> Enum.join()
   end
 
+  @spec do_translate(word :: String.t()) :: list(String.t())
+  defp do_translate(word) when is_binary(word), do: String.split(word, "", trim: true) |> do_translate("")
+
   @spec do_translate(phrase :: list(String.t())) :: list(String.t())
-  defp do_translate([word | rest_of_phrase]) do
+  defp do_translate([word | rest_of_phrase]), do: [do_translate(word) | do_translate(rest_of_phrase)]
+  defp do_translate([]), do: []
+
+  # TODO: Most probabaly `vowel?/1` and `consonant?/1` can be translated to guards with `in`
+
+  defp do_translate(word, "") when is_list(word) do
+    [letter | rest] = word
     cond do
-      consonant?(word) ->
-        [swap(word, consonant(word)) |> append("ay") | do_translate(rest_of_phrase)]
-      vowel?(word) ->
-        [append(word, "ay") | do_translate(rest_of_phrase)]
-      true -> 
-        [word | do_translate(rest_of_phrase)]
+      vowel?(letter) ->
+        word <> "ay"
+      consonant?(letter) ->
+        translate_word(rest, letter)
     end
   end
 
-  defp do_translate([]), do: []
+  defp translate_word(word, acc) when is_list(word) do
+    [letter | rest] = word
+    cond do
+      vowel?(letter) ->
+        word <> acc <> "ay"
+      consonant?(letter) ->
+        translate_word(rest, acc <> letter)
+    end
+  end
 
   @spec append(word :: String.t(), addition :: String.t()) :: String.t()
-  defp append(word, addition) do
-    word <> addition
-  end
+  defp append(word, addition), do: word <> addition
 
   @spec swap(word :: String.t(), to_swap :: String.t()) :: String.t()
   defp swap(word, to_swap) do
