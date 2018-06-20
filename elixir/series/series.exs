@@ -7,12 +7,15 @@ defmodule StringSeries do
   @spec slices(s :: String.t(), size :: integer) :: list(String.t())
   def slices(s, size), do: s |> String.codepoints() |> do_slices(size)
 
-  defp do_slices(cp, size)
+  @spec do_slices(cp :: list(String.t()), size :: integer, acc :: list(String.t())) :: list(String.t())
+  defp do_slices(cp, size, acc \\ [])
+
+  defp do_slices(cp, size, acc)
       when size <= 0
       when size > length(cp),
-    do: []
+    do: Enum.reverse(acc)
 
-  defp do_slices([_head | tail] = cp, size) do
-    [ Enum.slice(cp, 0, size) |> Enum.join() ] ++ do_slices(tail, size)
+  defp do_slices([_head | tail] = cp, size, acc) do
+    do_slices(tail, size, [ Enum.slice(cp, 0, size) |> Enum.join() ] ++ acc)
   end
 end
