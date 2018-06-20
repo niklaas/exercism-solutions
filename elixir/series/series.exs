@@ -5,17 +5,14 @@ defmodule StringSeries do
   return an empty list.
   """
   @spec slices(s :: String.t(), size :: integer) :: list(String.t())
-  def slices(s, size), do: s |> String.codepoints() |> do_slices(size)
+  def slices(s, size) when size > 0 do
+    s
+    |> String.codepoints()
+    |> Enum.chunk_every(size, 1, :discard)
+    |> Enum.map(&Enum.join/1)
+  end
 
-  @spec do_slices(cp :: list(String.t()), size :: integer, acc :: list(String.t())) :: list(String.t())
-  defp do_slices(cp, size, acc \\ [])
-
-  defp do_slices(cp, size, acc)
-      when size <= 0
-      when size > length(cp),
-    do: Enum.reverse(acc)
-
-  defp do_slices([_head | tail] = cp, size, acc) do
-    do_slices(tail, size, [ Enum.slice(cp, 0, size) |> Enum.join() ] ++ acc)
+  def slices(_, _) do
+    []
   end
 end
