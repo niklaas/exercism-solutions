@@ -1,0 +1,11 @@
+{
+  "*.ts": {
+    "type": "task",
+    "dispatch": "yarn test",
+    "alternate": "{}.test.ts"
+  },
+  "*.test.ts": {
+    "type": "test",
+    "alternate": "{}.ts"
+  }
+}
