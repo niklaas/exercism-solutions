@@ -1,0 +1,15 @@
+{
+  "*.exs": {
+    "type": "task",
+    "alternate": "{}_test.exs",
+    "dispatch": "elixir {}_test.exs"
+  },
+  "*_test.exs": {
+    "type": "test",
+    "alternate": "{}.exs",
+    "dispatch": "elixir {}_test.exs"
+  },
+  "*/README.md":  {
+    "type": "readme"
+  }
+}
