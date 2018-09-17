@@ -1,5 +1,5 @@
 defmodule Roman do
-  @numerals [
+  @nrl [
     {1000, "M"},
     {900, "CM"},
     {500, "D"},
@@ -21,28 +21,22 @@ defmodule Roman do
   """
   @spec numerals(pos_integer) :: String.t()
   def numerals(number) do
-    do_numerals(number, @numerals)
+    do_numerals(number, @nrl)
   end
 
-  @spec do_numerals(num:: integer(), tuples :: list(tuple())) :: String.t()
+  @spec do_numerals(num:: pos_integer(), tuples :: list(tuple())) :: String.t()
   defp do_numerals(num, [curr | rest]) do
     {curr_num, curr_rom} = curr
-    {rom, rem} = do_lookup(num, curr_num, curr_rom)
-    rom <> do_numerals(rem, rest)
+    {hits, rem} = do_hits_rem(num, curr_num)
+    String.duplicate(curr_rom, hits) <> do_numerals(rem, rest)
   end
 
   defp do_numerals(_, []) do
     ""
   end
 
-  defp do_lookup(num, curr_num, curr_rom) when rem(num, curr_num) == 0 do
-    { curr_rom |> String.duplicate(div(num, curr_num)), 0 }
-  end
-
-  defp do_lookup(num, curr_num, curr_rom) do
-    {
-      curr_rom |> String.duplicate(div(num, curr_num)),
-      rem(num, curr_num)
-    }
+  @spec do_hits_rem(num :: pos_integer(), curr_num :: pos_integer()) :: tuple()
+  defp do_hits_rem(num, curr_num) do
+    { div(num, curr_num), rem(num, curr_num) }
   end
 end
